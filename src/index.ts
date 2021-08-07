@@ -4,7 +4,7 @@ import * as s3deployment from '@aws-cdk/aws-s3-deployment';
 import * as cdk from '@aws-cdk/core';
 
 
-export interface StaticWebSiteProps extends cdk.StackProps {
+export interface IStaticWebSiteProps {
   domainName: string;
   siteSubDomain: string;
   siteContentsPath: string;
@@ -15,10 +15,10 @@ export interface StaticWebSiteProps extends cdk.StackProps {
 
 export class StaticWebSite extends cdk.Construct {
 
-  public siteDomain: string;
-  public distributionDomainName: string;
+  public readonly siteDomain: string;
+  public readonly distributionDomainName: string;
 
-  constructor(scope: cdk.Construct, id: string, props: StaticWebSiteProps) {
+  constructor(scope: cdk.Construct, id: string, props: IStaticWebSiteProps) {
     super(scope, id);
 
     // Domain name e.g. www.example.com

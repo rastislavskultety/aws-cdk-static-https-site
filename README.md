@@ -3,8 +3,7 @@
 
 This is aws-cdk library to create a static website hosted on S3 bucket and CloudFront
 
-
-Usage:
+Basic usage:
 
 ```js
 new StaticWebPage(scope, id, {
@@ -16,3 +15,5 @@ new StaticWebPage(scope, id, {
   certificateArn: 'arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012';
 })
 ```
+
+For details see [API documentation](API.md).
