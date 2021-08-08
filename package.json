@@ -1,8 +1,8 @@
 {
-  "name": "aws-cdk-static-website",
+  "name": "aws-cdk-static-https-site",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rskultety/aws-cdk-static-website.git"
+    "url": "https://github.com/rskultety/aws-cdk-static-https-site.git"
   },
   "scripts": {
     "clobber": "npx projen clobber",
