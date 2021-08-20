@@ -2,31 +2,31 @@
 
 ## Constructs <a name="Constructs"></a>
 
-### StaticWebSite <a name="aws-cdk-static-website.StaticWebSite"></a>
+### StaticWebSite <a name="aws-cdk-static-https-site.StaticWebSite"></a>
 
-#### Initializer <a name="aws-cdk-static-website.StaticWebSite.Initializer"></a>
+#### Initializer <a name="aws-cdk-static-https-site.StaticWebSite.Initializer"></a>
 
 ```typescript
-import { StaticWebSite } from 'aws-cdk-static-website'
+import { StaticWebSite } from 'aws-cdk-static-https-site'
 
 new StaticWebSite(scope: Construct, id: string, props: IStaticWebSiteProps)
 ```
 
-##### `scope`<sup>Required</sup> <a name="aws-cdk-static-website.StaticWebSite.parameter.scope"></a>
+##### `scope`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.parameter.scope"></a>
 
 - *Type:* [`@aws-cdk/core.Construct`](#@aws-cdk/core.Construct)
 
 ---
 
-##### `id`<sup>Required</sup> <a name="aws-cdk-static-website.StaticWebSite.parameter.id"></a>
+##### `id`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.parameter.id"></a>
 
 - *Type:* `string`
 
 ---
 
-##### `props`<sup>Required</sup> <a name="aws-cdk-static-website.StaticWebSite.parameter.props"></a>
+##### `props`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.parameter.props"></a>
 
-- *Type:* [`aws-cdk-static-website.IStaticWebSiteProps`](#aws-cdk-static-website.IStaticWebSiteProps)
+- *Type:* [`aws-cdk-static-https-site.IStaticWebSiteProps`](#aws-cdk-static-https-site.IStaticWebSiteProps)
 
 ---
 
@@ -34,13 +34,13 @@ new StaticWebSite(scope: Construct, id: string, props: IStaticWebSiteProps)
 
 #### Properties <a name="Properties"></a>
 
-##### `distributionDomainName`<sup>Required</sup> <a name="aws-cdk-static-website.StaticWebSite.property.distributionDomainName"></a>
+##### `distributionDomainName`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.distributionDomainName"></a>
 
 - *Type:* `string`
 
 ---
 
-##### `siteDomain`<sup>Required</sup> <a name="aws-cdk-static-website.StaticWebSite.property.siteDomain"></a>
+##### `siteDomain`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.siteDomain"></a>
 
 - *Type:* `string`
 
@@ -51,44 +51,44 @@ new StaticWebSite(scope: Construct, id: string, props: IStaticWebSiteProps)
 
 ## Protocols <a name="Protocols"></a>
 
-### IStaticWebSiteProps <a name="aws-cdk-static-website.IStaticWebSiteProps"></a>
+### IStaticWebSiteProps <a name="aws-cdk-static-https-site.IStaticWebSiteProps"></a>
 
-- *Implemented By:* [`aws-cdk-static-website.IStaticWebSiteProps`](#aws-cdk-static-website.IStaticWebSiteProps)
+- *Implemented By:* [`aws-cdk-static-https-site.IStaticWebSiteProps`](#aws-cdk-static-https-site.IStaticWebSiteProps)
 
 
 #### Properties <a name="Properties"></a>
 
-##### `certificateArn`<sup>Required</sup> <a name="aws-cdk-static-website.IStaticWebSiteProps.property.certificateArn"></a>
+##### `certificateArn`<sup>Required</sup> <a name="aws-cdk-static-https-site.IStaticWebSiteProps.property.certificateArn"></a>
 
 - *Type:* `string`
 
 ---
 
-##### `domainName`<sup>Required</sup> <a name="aws-cdk-static-website.IStaticWebSiteProps.property.domainName"></a>
+##### `domainName`<sup>Required</sup> <a name="aws-cdk-static-https-site.IStaticWebSiteProps.property.domainName"></a>
 
 - *Type:* `string`
 
 ---
 
-##### `siteContentsPath`<sup>Required</sup> <a name="aws-cdk-static-website.IStaticWebSiteProps.property.siteContentsPath"></a>
+##### `siteContentsPath`<sup>Required</sup> <a name="aws-cdk-static-https-site.IStaticWebSiteProps.property.siteContentsPath"></a>
 
 - *Type:* `string`
 
 ---
 
-##### `siteSubDomain`<sup>Required</sup> <a name="aws-cdk-static-website.IStaticWebSiteProps.property.siteSubDomain"></a>
+##### `siteSubDomain`<sup>Required</sup> <a name="aws-cdk-static-https-site.IStaticWebSiteProps.property.siteSubDomain"></a>
 
 - *Type:* `string`
 
 ---
 
-##### `websiteErrorDocument`<sup>Optional</sup> <a name="aws-cdk-static-website.IStaticWebSiteProps.property.websiteErrorDocument"></a>
+##### `websiteErrorDocument`<sup>Optional</sup> <a name="aws-cdk-static-https-site.IStaticWebSiteProps.property.websiteErrorDocument"></a>
 
 - *Type:* `string`
 
 ---
 
-##### `websiteIndexDocument`<sup>Optional</sup> <a name="aws-cdk-static-website.IStaticWebSiteProps.property.websiteIndexDocument"></a>
+##### `websiteIndexDocument`<sup>Optional</sup> <a name="aws-cdk-static-https-site.IStaticWebSiteProps.property.websiteIndexDocument"></a>
 
 - *Type:* `string`
 
