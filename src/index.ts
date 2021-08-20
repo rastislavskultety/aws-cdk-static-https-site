@@ -1,102 +1,425 @@
+/**
+ * Create static web site on AWS insfrastructure with https access
+ */
+
+import * as acm from '@aws-cdk/aws-certificatemanager';
 import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as route53 from '@aws-cdk/aws-route53';
+import { CloudFrontTarget } from '@aws-cdk/aws-route53-targets';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as s3deployment from '@aws-cdk/aws-s3-deployment';
 import * as cdk from '@aws-cdk/core';
+import { makeProps, xor } from './tools';
 
 
-export interface IStaticWebSiteProps {
-  domainName: string;
-  siteSubDomain: string;
-  siteContentsPath: string;
-  websiteIndexDocument?: string;
-  websiteErrorDocument?: string;
+/**
+ * Properties of custom S3 bucket for static web site.
+ */
+interface StaticWebSiteBucketProps extends s3.BucketProps {
+  domain: string; // Domain name, eg. www.example.org or example.org, will be used as bucket name
+}
+
+
+/**
+ * Custom S3 bucket for static web site
+ */
+class StaticWebSiteBucket extends s3.Bucket {
+  constructor(scope: cdk.Construct, id: string, props: StaticWebSiteBucketProps) {
+    const def = {
+      // Default props
+      defaults: {
+        // Delete S3 objects when destroying bucket
+        autoDeleteObjects: true,
+        // Destroy S3 bucket when destroying the stack
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+      },
+      // Override props
+      overrides: {
+        // The physical bucket name must be the same as the domain name
+        bucketName: props.domain,
+        // Grant access to the files to public
+        publicReadAccess: true,
+      },
+    };
+
+    // Check props validity, static web site should either have index document or should be redirected to another domain
+    if (!xor((props.websiteIndexDocument || props.websiteErrorDocument), props.websiteRedirect)) {
+      throw new Error('StaticWebSiteBucket: either websiteIndexDocument+websiteErrorDocument or websiteRedirect property must be specified.');
+    }
+
+    super(scope, id, makeProps(props, def));
+  }
+}
+
+
+/**
+ * Properties for CloudFront distribution
+ */
+interface StaticWebSiteDistributionProps {
+  domain: string;
   certificateArn: string;
 }
 
+
+/**
+ * Custom CloudFront web distribution construct
+ */
+class StaticWebSiteDistribution extends cloudfront.CloudFrontWebDistribution {
+  constructor(scope: cdk.Construct, id: string, bucket: s3.Bucket, props: StaticWebSiteDistributionProps) {
+    const distributionProps: cloudfront.CloudFrontWebDistributionProps = {
+      // Aliases to accesss the web site distribution
+      aliasConfiguration: {
+        acmCertRef: props.certificateArn,
+        names: [props.domain],
+        sslMethod: cloudfront.SSLMethod.SNI,
+        securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
+      },
+      // Set origin to the site bucket
+      originConfigs: [
+        {
+          customOriginSource: {
+            domainName: bucket.bucketWebsiteDomainName,
+            originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+          },
+          behaviors: [{ isDefaultBehavior: true }],
+        },
+      ],
+    };
+    super(scope, id, distributionProps);
+  }
+}
+
+
+/**
+ * Specification which of root domain / sub domain is primarilly used to host the static web site.
+ * The other domain can be optionally redirected to the primary domain.
+ */
+export enum StaticWebSitePrimaryDomain {
+  ROOT_DOMAIN,
+  SUB_DOMAIN,
+}
+
+/**
+ * Type of certificate validation (not used if using Route 53)
+ * If hosted zone is not available then a certificate can be created using DNS or EMAIL validation.
+ */
+export enum StaticWebSiteCertificateValidation {
+  FROM_DNS,
+  FROM_EMAIL,
+}
+
+/**
+ * Properties of static web site
+ */
+export interface StaticWebSiteProps extends cdk.StackProps {
+  /**
+   * Local path where are files of the the static web site stored.
+   */
+  readonly siteContentsPath: string;
+
+  /**
+   * Root domain of the web site, e.g. "example.org".
+   */
+  readonly rootDomain: string;
+
+  /**
+   * Sub domain of the web site e.g. "www".
+   */
+  readonly siteSubDomain?: string;
+
+  /**
+   * Which domain is the primary domain for the web site - the root domain (e.g. example.org) or
+   * the sub domain (e.g. www.example.org).
+   *
+   * @default StaticWebSitePrimaryDomain.SUB_DOMAIN.
+   */
+  readonly primaryDomain?: StaticWebSitePrimaryDomain;
+
+  /**
+   * Redirect secondary domain to the primary domain.
+   *
+   * @default false
+   */
+  readonly redirectSecondaryDomain?: boolean;
+
+  /**
+   * File name of the main index document of the web site.
+   *
+   * @default: 'index.html'
+   */
+  readonly websiteIndexDocument?: string;
+
+  /**
+   * File name of the error 404 document of the web site.
+   *
+   * @default: undefined
+   */
+  readonly websiteErrorDocument?: string;
+
+  /**
+   * Use Route 53 hosted zone.
+   *
+   * @default true
+   */
+  readonly useRoute53?: boolean;
+
+  /**
+   * ARN of the existing certificate. Unless using Route 53, it is recommended to create certificate
+   * manually in AWS Console and pass it's ARN in this parameter. If certificateArn is not defined
+   * then the certificate is created and validated depending on certificateValidation parameter.
+   */
+  readonly certificateArn?: string;
+
+  /**
+   * Create wildcard certificate for the sub-domain, e.g. *.example.org.
+   *
+   * @default false
+   */
+  readonly createWildcardCertificate?: boolean;
+
+  /**
+   * Choose validation type for creating new certificate. It is not used when using Route 53 (useRoute53 is true).
+   *
+   * @default StaticWebSiteCertificateValidation.FROM_EMAIL
+   */
+  readonly certificateValidation?: StaticWebSiteCertificateValidation;
+}
+
+/**
+ * Construct to create static web site with TLS certificate.
+ *
+ * The web site is hosted using AWS S3 bucket and CloudFront distribution.
+ */
 export class StaticWebSite extends cdk.Construct {
 
+  /**
+   * Domain name of the site (eg. www.example.org or example.org)
+   */
   public readonly siteDomain: string;
-  public readonly distributionDomainName: string;
 
-  constructor(scope: cdk.Construct, id: string, props: IStaticWebSiteProps) {
+  /**
+   * Domain name of the CloudFront distribution (e.g. abc123defghij.cloudfront.net).
+   * When not using the Route 53 hosted zone, this domain can be set as CNAME
+   * for the domain to redirect to the distribution.
+   */
+  public readonly distributionDomain: string;
+
+  /**
+   * Domain name of the redirected secondary domain (e.g. example.org). Depends on property
+   * primaryDomain. It is undefined if property redirectSecondaryDomain is false.
+   */
+  public readonly redirectedDomain: string | undefined;
+
+  /**
+   * Domain name of the CloudFront distribution (e.g. abc123defghij.cloudfront.net) created
+   * to redirect secondary domain to primary domain.
+   */
+  public readonly redirectionDistributionDomain: string | undefined;
+
+  /**
+   * Create new static web site.
+   *
+   * @param scope - Scope where the site is created, e.g. stack
+   * @param id - Construct id
+   * @param props - Properties
+   */
+  constructor(scope: cdk.Construct, id: string, props: StaticWebSiteProps) {
     super(scope, id);
 
-    // Domain name e.g. www.example.com
-    const siteDomain = props.siteSubDomain + '.' + props.domainName;
-    new cdk.CfnOutput(this, 'Site', { value: 'https://' + siteDomain });
-
-    this.siteDomain = siteDomain;
-
-    // Content bucket to store the static web pages
-    const siteBucket = new s3.Bucket(this, 'SiteBucket', {
-      // The physical bucket name must be the same as the domain name
-      bucketName: siteDomain,
-
-      // Grant access to the files to public
-      publicReadAccess: true,
-
-      // Delete all objects when destroying stack / bucket
-      autoDeleteObjects: true,
-
-      // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
-      // the new bucket, and it will remain in your account until manually deleted. By setting the policy to
-      // DESTROY, cdk destroy will attempt to delete the bucket, but will error if the bucket is not empty.
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-
-      // The main html document (usually index.html)
-      websiteIndexDocument: props.websiteIndexDocument || 'index.html',
-
-      // Html document returnt for http error 404
-      websiteErrorDocument: props.websiteErrorDocument || 'index.html',
-
-    });
-    new cdk.CfnOutput(this, 'Bucket', { value: siteBucket.bucketName });
-
-
-    // // TLS certificate
-    // // If not using Route S3 domain hosting, it is safer to create certificate manually
-    // // and pass its ARN in props
-    // const certificate = new acm.Certificate(this, 'SiteCertificate', {
-    //   domainName: siteDomain,
-    //   validation: acm.CertificateValidation.fromDns(), // Records must be added manually
-    // });
-    // new cdk.CfnOutput(this, "Certificate", { value: certificate.certificateArn });
-
-    const certificateArn = props.certificateArn;
-
-    // CloudFront distribution that provides HTTPS
-    const distribution = new cloudfront.CloudFrontWebDistribution(
-      this,
-      'SiteDistribution',
-      {
-        aliasConfiguration: {
-          acmCertRef: certificateArn,
-          names: [siteDomain],
-          sslMethod: cloudfront.SSLMethod.SNI,
-          securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
-        },
-        originConfigs: [
-          {
-            customOriginSource: {
-              domainName: siteBucket.bucketWebsiteDomainName,
-              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-            },
-            behaviors: [{ isDefaultBehavior: true }],
-          },
-        ],
+    // Define default values
+    const def = {
+      defaults: {
+        websiteIndexDocument: 'index.html',
+        wildcardCertificate: false,
+        useRoute53: true,
+        primaryDomain: StaticWebSitePrimaryDomain.SUB_DOMAIN,
+        redirectSecondaryDomain: false,
       },
-    );
-    new cdk.CfnOutput(this, 'DistributionId', {
-      value: distribution.distributionId,
-    });
-    // This address has to be set in domain dns records as CNAME
-    new cdk.CfnOutput(this, 'DistributionDomainName', {
-      value: distribution.distributionDomainName,
-    });
-    this.distributionDomainName = distribution.distributionDomainName;
+    };
 
-    // Deploy site contents to S3 bucket
-    new s3deployment.BucketDeployment(this, 'DeployWithInvalidation', {
+    props = makeProps(props, def);
+
+    /*
+     * Check props
+     */
+
+    if (!props.rootDomain) throw new Error('StaticWebsite: rootDomain must be specified');
+
+    if (!props.siteContentsPath) throw new Error('StaticWebsite: siteContentsPath must be specified');
+
+    if (!xor(props.certificateArn, props.useRoute53)) {
+      throw new Error('StaticWebSite: either certificateArn or userRoute53 must be specified.');
+    }
+
+    if (props.createWildcardCertificate && props.primaryDomain !== StaticWebSitePrimaryDomain.SUB_DOMAIN) {
+      throw new Error('StaticWebSite: createWildcardCertificate valid only for primaryDomain=SUB_DOMAIN');
+    }
+
+    if (!props.siteSubDomain && props.primaryDomain == StaticWebSitePrimaryDomain.SUB_DOMAIN) {
+      throw new Error('StaticWebSite: siteSubDomain must be specified if selected as primary domain');
+    }
+
+    if (!props.siteSubDomain && props.redirectSecondaryDomain) {
+      throw new Error('StaticWebSite: siteSubDomain must be specified if redirectSecondaryDomain=true');
+    }
+
+    if (!props.useRoute53) {
+      if (props.primaryDomain == StaticWebSitePrimaryDomain.ROOT_DOMAIN) {
+        throw new Error('StaticWebSite: root domain cannot be used if not using Route 53 due to DNS limitations');
+      }
+      if (props.redirectSecondaryDomain) {
+        throw new Error('StaticWebSite: redirection of root domain is not possible if not using Route 53 due to DNS limitations');
+      }
+    }
+
+
+    /*
+     * Setup domain names
+     */
+
+    if (props.primaryDomain == StaticWebSitePrimaryDomain.SUB_DOMAIN) {
+      this.siteDomain = props.siteSubDomain + '.' + props.rootDomain;
+      if (props.redirectSecondaryDomain) {
+        this.redirectedDomain = props.rootDomain;
+      }
+    } else {
+      this.siteDomain = props.rootDomain;
+      if (props.redirectSecondaryDomain) {
+        this.redirectedDomain = props.siteSubDomain + '.' + props.rootDomain;
+      }
+    }
+    new cdk.CfnOutput(this, 'Site Url', { value: 'https://' + this.siteDomain });
+    if (this.redirectedDomain) {
+      new cdk.CfnOutput(this, 'Redirected Url', { value: 'https://' + this.redirectedDomain });
+    }
+
+
+    /*
+     * Get hosted zone
+     */
+
+    let hostedZone;
+    if (props.useRoute53) {
+      hostedZone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.rootDomain });
+    }
+
+
+    /*
+     * Add TLS certificate for the site
+     */
+
+    const certificateArn = props.certificateArn ||
+      new acm.Certificate(this, 'Certificate', {
+        domainName: props.createWildcardCertificate ? '*.' + props.rootDomain : this.siteDomain,
+        subjectAlternativeNames: props.redirectSecondaryDomain ? [this.redirectedDomain!] : [],
+        validation:
+          hostedZone
+            ? acm.CertificateValidation.fromDns(hostedZone)
+            : (props.certificateValidation === StaticWebSiteCertificateValidation.FROM_DNS
+              ? acm.CertificateValidation.fromDns()
+              : acm.CertificateValidation.fromEmail()
+            ),
+      }).certificateArn;
+
+
+    /*
+     * Content bucket to store the static web pages
+     */
+
+    const siteBucket = new StaticWebSiteBucket(this, 'Site Bucket', {
+      domain: this.siteDomain,
+      websiteIndexDocument: props.websiteIndexDocument,
+      websiteErrorDocument: props.websiteErrorDocument,
+    });
+
+
+    /*
+     * Cloudfront distribution
+     */
+
+    const distribution = new StaticWebSiteDistribution(this, 'Site Distribution', siteBucket, {
+      domain: this.siteDomain,
+      certificateArn,
+    });
+
+
+    /*
+     * If not using route53, this address has to be set in domain dns records as CNAME
+     */
+
+    if (!hostedZone) {
+      new cdk.CfnOutput(this, 'Set DNS CNAME to distribution domain', {
+        value: distribution.distributionDomainName,
+      });
+    }
+
+    this.distributionDomain = distribution.distributionDomainName;
+    this.redirectionDistributionDomain = undefined;
+
+
+    /*
+     * Route53 alias record for the CloudFront distribution
+     */
+
+    if (hostedZone) {
+      new route53.ARecord(this, 'Site Alias Record', {
+        recordName: this.siteDomain,
+        target: route53.RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+        zone: hostedZone,
+      });
+    }
+
+
+    /*
+     * Manage redirection of root-domain => sub-domain or sub-domain => root-domain
+     */
+
+    if (props.redirectSecondaryDomain) {
+
+      /*
+       * Create an empty bucket for the redirected domain and set the bucket redirection
+       */
+
+      const redirectBucket = new StaticWebSiteBucket(this, 'Redirection Bucket', {
+        domain: this.redirectedDomain!,
+        autoDeleteObjects: false, // no need to auto delete objects because the bucket will be empty
+        websiteRedirect: {
+          hostName: this.siteDomain,
+          protocol: s3.RedirectProtocol.HTTPS,
+        },
+      });
+
+      /*
+       * Create another distribution which will handle the http/https traffic, and the redirection bucket
+       * will redirect it to the primary domain.
+       */
+
+      const redirectDistribution = new StaticWebSiteDistribution(this, 'Redirection Distribution', redirectBucket, {
+        domain: this.redirectedDomain!,
+        certificateArn: certificateArn,
+      });
+
+      this.redirectionDistributionDomain = redirectDistribution.distributionDomainName;
+
+      /*
+       * Route53 alias record for the CloudFront hosted distribution.
+       */
+
+      if (hostedZone) {
+        new route53.ARecord(this, 'Redirection Alias Record', {
+          recordName: this.redirectedDomain,
+          target: route53.RecordTarget.fromAlias(new CloudFrontTarget(redirectDistribution)),
+          zone: hostedZone,
+        });
+      }
+    }
+
+
+    /*
+     * Deploy site contents to S3 bucket
+     */
+
+    new s3deployment.BucketDeployment(this, 'Deploy With Invalidation', {
       sources: [s3deployment.Source.asset(props.siteContentsPath)],
       destinationBucket: siteBucket,
       distribution,

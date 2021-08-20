@@ -6,12 +6,14 @@ const project = new AwsCdkConstructLibrary({
   defaultReleaseBranch: 'main',
   name: 'aws-cdk-static-https-site',
   repositoryUrl: 'https://github.com/rskultety/aws-cdk-static-https-site.git',
-
   cdkDependencies: [
     '@aws-cdk/core',
     '@aws-cdk/aws-s3',
     '@aws-cdk/aws-s3-deployment',
     '@aws-cdk/aws-cloudfront',
+    '@aws-cdk/aws-route53',
+    '@aws-cdk/aws-route53-targets',
+    '@aws-cdk/aws-certificatemanager',
   ], /* Which AWS CDK modules (those that start with "@aws-cdk/") does this library require when consumed? */
   // cdkTestDependencies: undefined,    /* AWS CDK modules required for testing. */
   // deps: [],                          /* Runtime dependencies of this module. */

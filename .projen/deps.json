@@ -90,7 +90,22 @@
       "type": "build"
     },
     {
+      "name": "@aws-cdk/aws-certificatemanager",
+      "version": "^1.95.2",
+      "type": "peer"
+    },
+    {
       "name": "@aws-cdk/aws-cloudfront",
+      "version": "^1.95.2",
+      "type": "peer"
+    },
+    {
+      "name": "@aws-cdk/aws-route53-targets",
+      "version": "^1.95.2",
+      "type": "peer"
+    },
+    {
+      "name": "@aws-cdk/aws-route53",
       "version": "^1.95.2",
       "type": "peer"
     },
@@ -115,7 +130,22 @@
       "type": "peer"
     },
     {
+      "name": "@aws-cdk/aws-certificatemanager",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-cdk/aws-cloudfront",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-route53-targets",
+      "version": "^1.95.2",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-route53",
       "version": "^1.95.2",
       "type": "runtime"
     },

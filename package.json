@@ -14,7 +14,8 @@
     "test:update": "npx projen test:update",
     "bump": "npx projen bump",
     "unbump": "npx projen unbump",
-    "upgrade-dependencies": "npx projen upgrade-dependencies",
+    "publish:github": "npx projen publish:github",
+    "upgrade": "npx projen upgrade",
     "upgrade-projen": "npx projen upgrade-projen",
     "default": "npx projen default",
     "watch": "npx projen watch",
@@ -55,14 +56,20 @@
     "typescript": "^4.3.5"
   },
   "peerDependencies": {
+    "@aws-cdk/aws-certificatemanager": "^1.95.2",
     "@aws-cdk/aws-cloudfront": "^1.95.2",
+    "@aws-cdk/aws-route53": "^1.95.2",
+    "@aws-cdk/aws-route53-targets": "^1.95.2",
     "@aws-cdk/aws-s3": "^1.95.2",
     "@aws-cdk/aws-s3-deployment": "^1.95.2",
     "@aws-cdk/core": "^1.95.2",
     "constructs": "^3.2.27"
   },
   "dependencies": {
+    "@aws-cdk/aws-certificatemanager": "^1.95.2",
     "@aws-cdk/aws-cloudfront": "^1.95.2",
+    "@aws-cdk/aws-route53": "^1.95.2",
+    "@aws-cdk/aws-route53-targets": "^1.95.2",
     "@aws-cdk/aws-s3": "^1.95.2",
     "@aws-cdk/aws-s3-deployment": "^1.95.2",
     "@aws-cdk/core": "^1.95.2"
