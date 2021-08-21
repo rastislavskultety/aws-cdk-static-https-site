@@ -44,6 +44,22 @@ Properties.
 
 #### Properties <a name="Properties"></a>
 
+##### `bucket`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.bucket"></a>
+
+- *Type:* [`@aws-cdk/aws-s3.Bucket`](#@aws-cdk/aws-s3.Bucket)
+
+Reference to S3 bucket holding the static web site.
+
+---
+
+##### `distribution`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.distribution"></a>
+
+- *Type:* [`@aws-cdk/aws-cloudfront.CloudFrontWebDistribution`](#@aws-cdk/aws-cloudfront.CloudFrontWebDistribution)
+
+Reference to CloudFront distribution.
+
+---
+
 ##### `distributionDomain`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.distributionDomain"></a>
 
 - *Type:* `string`
@@ -62,11 +78,35 @@ www.example.org or example.org)
 
 ---
 
+##### `certificate`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.certificate"></a>
+
+- *Type:* [`@aws-cdk/aws-certificatemanager.Certificate`](#@aws-cdk/aws-certificatemanager.Certificate)
+
+Reference to created certificate.
+
+---
+
 ##### `redirectedDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectedDomain"></a>
 
 - *Type:* `string`
 
 Domain name of the redirected secondary domain (e.g. example.org). Depends on property primaryDomain. It is undefined if property redirectSecondaryDomain is false.
+
+---
+
+##### `redirectionBucket`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectionBucket"></a>
+
+- *Type:* [`@aws-cdk/aws-s3.Bucket`](#@aws-cdk/aws-s3.Bucket)
+
+Reference to S3 bucket created for redirection of secondary domain.
+
+---
+
+##### `redirectionDistribution`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectionDistribution"></a>
+
+- *Type:* [`@aws-cdk/aws-cloudfront.CloudFrontWebDistribution`](#@aws-cdk/aws-cloudfront.CloudFrontWebDistribution)
+
+Reference to CloudFront distribution created for redirection of secondary domain.
 
 ---
 
