@@ -1,4 +1,7 @@
 import { SynthUtils } from '@aws-cdk/assert';
+import * as acm from '@aws-cdk/aws-certificatemanager';
+import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as s3 from '@aws-cdk/aws-s3';
 import { Stack } from '@aws-cdk/core';
 import { StaticWebSiteProps, StaticWebSite, StaticWebSitePrimaryDomain } from '../src';
 import '@aws-cdk/assert/jest';
@@ -53,8 +56,23 @@ test('All resources are created', () => {
   expect(stack).toHaveResource('AWS::Route53::RecordSet', { Name: 'www.example.org.', Type: 'A' });
 });
 
+test('StaticWebSite props are initialized', () => {
+  const { site } = createTestCase();
+  const nonEmptyString = /.+/;
+
+  expect(site.siteDomain).toMatch(nonEmptyString);
+  expect(site.distributionDomain).toMatch(nonEmptyString);
+  expect(site.redirectedDomain).toMatch(nonEmptyString);
+  expect(site.redirectionDistributionDomain).toMatch(nonEmptyString);
+  expect(site.bucket).toBeInstanceOf(s3.Bucket);
+  expect(site.distribution).toBeInstanceOf(cloudfront.CloudFrontWebDistribution);
+  expect(site.certificate).toBeInstanceOf(acm.Certificate);
+  expect(site.redirectionBucket).toBeInstanceOf(s3.Bucket);
+  expect(site.redirectionDistribution).toBeInstanceOf(cloudfront.CloudFrontWebDistribution);
+});
+
 test('Domain names are correct for primaryDomain=SUB_DOMAIN', () => {
-  const { site } = createTestCase({ primaryDomain: StaticWebSitePrimaryDomain.SUB_DOMAIN });
+  const { site } = createTestCase({ redirectSecondaryDomain: true });
 
   expect(site.siteDomain).toBe('www.example.org');
   expect(site.redirectedDomain).toBe('example.org');

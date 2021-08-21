@@ -99,6 +99,7 @@ export enum StaticWebSitePrimaryDomain {
   SUB_DOMAIN,
 }
 
+
 /**
  * Type of certificate validation (not used if using Route 53)
  * If hosted zone is not available then a certificate can be created using DNS or EMAIL validation.
@@ -107,6 +108,7 @@ export enum StaticWebSiteCertificateValidation {
   FROM_DNS,
   FROM_EMAIL,
 }
+
 
 /**
  * Properties of static web site
@@ -185,6 +187,7 @@ export interface StaticWebSiteProps extends cdk.StackProps {
   readonly certificateValidation?: StaticWebSiteCertificateValidation;
 }
 
+
 /**
  * Construct to create static web site with TLS certificate.
  *
@@ -215,6 +218,31 @@ export class StaticWebSite extends cdk.Construct {
    * to redirect secondary domain to primary domain.
    */
   public readonly redirectionDistributionDomain: string | undefined;
+
+  /**
+   * Reference to S3 bucket holding the static web site
+   */
+  public readonly bucket: s3.Bucket;
+
+  /**
+   * Reference to CloudFront distribution
+   */
+  public readonly distribution: cloudfront.CloudFrontWebDistribution;
+
+  /**
+   * Reference to S3 bucket created for redirection of secondary domain
+   */
+  public readonly redirectionBucket: s3.Bucket | undefined;
+
+  /**
+   * Reference to CloudFront distribution created for redirection of secondary domain
+   */
+  public readonly redirectionDistribution: cloudfront.CloudFrontWebDistribution | undefined;
+
+  /**
+   * Reference to created certificate
+   */
+  public readonly certificate: acm.Certificate | undefined;
 
   /**
    * Create new static web site.
@@ -308,8 +336,10 @@ export class StaticWebSite extends cdk.Construct {
      * Add TLS certificate for the site
      */
 
-    const certificateArn = props.certificateArn ||
-      new acm.Certificate(this, 'Certificate', {
+    let certificateArn = props.certificateArn;
+
+    if (!certificateArn) {
+      this.certificate = new acm.Certificate(this, 'Certificate', {
         domainName: props.createWildcardCertificate ? '*.' + props.rootDomain : this.siteDomain,
         subjectAlternativeNames: props.redirectSecondaryDomain ? [this.redirectedDomain!] : [],
         validation:
@@ -319,14 +349,16 @@ export class StaticWebSite extends cdk.Construct {
               ? acm.CertificateValidation.fromDns()
               : acm.CertificateValidation.fromEmail()
             ),
-      }).certificateArn;
+      });
+      certificateArn = this.certificate.certificateArn;
+    }
 
 
     /*
      * Content bucket to store the static web pages
      */
 
-    const siteBucket = new StaticWebSiteBucket(this, 'Site Bucket', {
+    this.bucket = new StaticWebSiteBucket(this, 'Site Bucket', {
       domain: this.siteDomain,
       websiteIndexDocument: props.websiteIndexDocument,
       websiteErrorDocument: props.websiteErrorDocument,
@@ -337,7 +369,7 @@ export class StaticWebSite extends cdk.Construct {
      * Cloudfront distribution
      */
 
-    const distribution = new StaticWebSiteDistribution(this, 'Site Distribution', siteBucket, {
+    this.distribution = new StaticWebSiteDistribution(this, 'Site Distribution', this.bucket, {
       domain: this.siteDomain,
       certificateArn,
     });
@@ -349,11 +381,11 @@ export class StaticWebSite extends cdk.Construct {
 
     if (!hostedZone) {
       new cdk.CfnOutput(this, 'Set DNS CNAME to distribution domain', {
-        value: distribution.distributionDomainName,
+        value: this.distribution.distributionDomainName,
       });
     }
 
-    this.distributionDomain = distribution.distributionDomainName;
+    this.distributionDomain = this.distribution.distributionDomainName;
     this.redirectionDistributionDomain = undefined;
 
 
@@ -364,7 +396,7 @@ export class StaticWebSite extends cdk.Construct {
     if (hostedZone) {
       new route53.ARecord(this, 'Site Alias Record', {
         recordName: this.siteDomain,
-        target: route53.RecordTarget.fromAlias(new CloudFrontTarget(distribution)),
+        target: route53.RecordTarget.fromAlias(new CloudFrontTarget(this.distribution)),
         zone: hostedZone,
       });
     }
@@ -380,7 +412,7 @@ export class StaticWebSite extends cdk.Construct {
        * Create an empty bucket for the redirected domain and set the bucket redirection
        */
 
-      const redirectBucket = new StaticWebSiteBucket(this, 'Redirection Bucket', {
+      this.redirectionBucket = new StaticWebSiteBucket(this, 'Redirection Bucket', {
         domain: this.redirectedDomain!,
         autoDeleteObjects: false, // no need to auto delete objects because the bucket will be empty
         websiteRedirect: {
@@ -394,12 +426,12 @@ export class StaticWebSite extends cdk.Construct {
        * will redirect it to the primary domain.
        */
 
-      const redirectDistribution = new StaticWebSiteDistribution(this, 'Redirection Distribution', redirectBucket, {
+      this.redirectionDistribution = new StaticWebSiteDistribution(this, 'Redirection Distribution', this.redirectionBucket, {
         domain: this.redirectedDomain!,
         certificateArn: certificateArn,
       });
 
-      this.redirectionDistributionDomain = redirectDistribution.distributionDomainName;
+      this.redirectionDistributionDomain = this.redirectionDistribution.distributionDomainName;
 
       /*
        * Route53 alias record for the CloudFront hosted distribution.
@@ -408,7 +440,7 @@ export class StaticWebSite extends cdk.Construct {
       if (hostedZone) {
         new route53.ARecord(this, 'Redirection Alias Record', {
           recordName: this.redirectedDomain,
-          target: route53.RecordTarget.fromAlias(new CloudFrontTarget(redirectDistribution)),
+          target: route53.RecordTarget.fromAlias(new CloudFrontTarget(this.redirectionDistribution)),
           zone: hostedZone,
         });
       }
@@ -421,8 +453,8 @@ export class StaticWebSite extends cdk.Construct {
 
     new s3deployment.BucketDeployment(this, 'Deploy With Invalidation', {
       sources: [s3deployment.Source.asset(props.siteContentsPath)],
-      destinationBucket: siteBucket,
-      distribution,
+      destinationBucket: this.bucket,
+      distribution: this.distribution,
       distributionPaths: ['/*'],
     });
   }
