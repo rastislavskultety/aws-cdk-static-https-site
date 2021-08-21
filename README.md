@@ -39,9 +39,9 @@ const stack = new Stack(app, 'my-stack', {
 
 // Create web site https://www.example.org with index.html as main document
 new StaticWebPage(stack, 'Site', {
-  rootDomain: 'example.org';
-  siteSubDomain: 'www';
-  siteContentsPath: './website'; // Path to local folder with the web site files
+  rootDomain: 'example.org',
+  siteSubDomain: 'www',
+  siteContentsPath: './website', // Path to local folder with the web site files
 });
 
 app.synth();
@@ -67,7 +67,7 @@ import { StaticWebPage } from 'aws-cdk-static-https-site';
 
 new StaticWebPage(stack, 'Site', {
   rootDomain: 'example.org',
-  siteSubDomain: 'www';
+  siteSubDomain: 'www',
   siteContentsPath: './website',
   websiteIndexDocument: 'main.html', // main html document
   websiteErrorDocument: '404.html', // document for http error 404 (not found)
