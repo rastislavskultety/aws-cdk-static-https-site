@@ -47,7 +47,9 @@ new StaticWebPage(stack, 'Site', {
 app.synth();
 ```
 
-For detailed documentation see [API documentation](API.md).
+# API Reference
+
+For detailed documentation see [API reference](https://github.com/rastislavskultety/aws-cdk-static-https-site/blob/main/API.md).
 
 
 # Advanced examples
