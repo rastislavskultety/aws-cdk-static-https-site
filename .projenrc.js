@@ -5,7 +5,7 @@ const project = new AwsCdkConstructLibrary({
   cdkVersion: '1.95.2',
   defaultReleaseBranch: 'main',
   name: 'aws-cdk-static-https-site',
-  repositoryUrl: 'https://github.com/rskultety/aws-cdk-static-https-site.git',
+  repositoryUrl: 'https://github.com/rastislavskultety/aws-cdk-static-https-site.git',
   cdkDependencies: [
     '@aws-cdk/core',
     '@aws-cdk/aws-s3',
