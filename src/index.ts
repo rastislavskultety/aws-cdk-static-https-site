@@ -58,6 +58,7 @@ class StaticWebSiteBucket extends s3.Bucket {
 interface StaticWebSiteDistributionProps {
   domain: string;
   certificateArn: string;
+  defaultRootObject?: string;
 }
 
 
@@ -84,6 +85,7 @@ class StaticWebSiteDistribution extends cloudfront.CloudFrontWebDistribution {
           behaviors: [{ isDefaultBehavior: true }],
         },
       ],
+      defaultRootObject: props.defaultRootObject,
     };
     super(scope, id, distributionProps);
   }
@@ -185,6 +187,17 @@ export interface StaticWebSiteProps extends cdk.StackProps {
    * @default StaticWebSiteCertificateValidation.FROM_EMAIL
    */
   readonly certificateValidation?: StaticWebSiteCertificateValidation;
+
+  /**
+   * Defines defaultRootObject of the CloudFront distribution.
+   * The object (file name) to return when a viewer requests the root URL (/) instead of a specific object.
+   *
+   * By default the CloudFront uses index.html, however it is better to leave it empty and let S3 bucket to choose
+   * the right root document. Therefore the StaticWebSite is using empty string as defaultRootObject.
+   *
+   * @default ''
+   */
+  readonly defaultRootObject?: string;
 }
 
 
@@ -267,6 +280,7 @@ export class StaticWebSite extends cdk.Construct {
         useRoute53: true,
         primaryDomain: StaticWebSitePrimaryDomain.SUB_DOMAIN,
         redirectSecondaryDomain: false,
+        defaultRootObject: '',
       },
     };
 
@@ -376,6 +390,7 @@ export class StaticWebSite extends cdk.Construct {
     this.distribution = new StaticWebSiteDistribution(this, 'Site Distribution', this.bucket, {
       domain: this.siteDomain,
       certificateArn,
+      defaultRootObject: props.defaultRootObject,
     });
 
 
@@ -433,6 +448,7 @@ export class StaticWebSite extends cdk.Construct {
       this.redirectionDistribution = new StaticWebSiteDistribution(this, 'Redirection Distribution', this.redirectionBucket, {
         domain: this.redirectedDomain!,
         certificateArn: certificateArn,
+        defaultRootObject: props.defaultRootObject,
       });
 
       this.redirectionDistributionDomain = this.redirectionDistribution.distributionDomainName;

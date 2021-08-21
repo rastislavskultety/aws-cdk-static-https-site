@@ -274,6 +274,20 @@ Create wildcard certificate for the sub-domain, e.g. *.example.org.
 
 ---
 
+##### `defaultRootObject`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.defaultRootObject"></a>
+
+- *Type:* `string`
+- *Default:* ''
+
+Defines defaultRootObject of the CloudFront distribution.
+
+The object (file name) to return when a viewer requests the root URL (/) instead of a specific object.
+
+By default the CloudFront uses index.html, however it is better to leave it empty and let S3 bucket to choose
+the right root document. Therefore the StaticWebSite is using empty string as defaultRootObject.
+
+---
+
 ##### `primaryDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.primaryDomain"></a>
 
 - *Type:* [`aws-cdk-static-https-site.StaticWebSitePrimaryDomain`](#aws-cdk-static-https-site.StaticWebSitePrimaryDomain)
