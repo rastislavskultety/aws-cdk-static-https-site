@@ -245,6 +245,11 @@ export class StaticWebSite extends cdk.Construct {
   public readonly certificate: acm.Certificate | undefined;
 
   /**
+   * Reference to hosted zone
+   */
+  public readonly hostedZone: route53.IHostedZone | undefined;
+
+  /**
    * Create new static web site.
    *
    * @param scope - Scope where the site is created, e.g. stack
@@ -326,9 +331,8 @@ export class StaticWebSite extends cdk.Construct {
      * Get hosted zone
      */
 
-    let hostedZone;
     if (props.useRoute53) {
-      hostedZone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.rootDomain });
+      this.hostedZone = route53.HostedZone.fromLookup(this, 'Zone', { domainName: props.rootDomain });
     }
 
 
@@ -343,8 +347,8 @@ export class StaticWebSite extends cdk.Construct {
         domainName: props.createWildcardCertificate ? '*.' + props.rootDomain : this.siteDomain,
         subjectAlternativeNames: props.redirectSecondaryDomain ? [this.redirectedDomain!] : [],
         validation:
-          hostedZone
-            ? acm.CertificateValidation.fromDns(hostedZone)
+          this.hostedZone
+            ? acm.CertificateValidation.fromDns(this.hostedZone)
             : (props.certificateValidation === StaticWebSiteCertificateValidation.FROM_DNS
               ? acm.CertificateValidation.fromDns()
               : acm.CertificateValidation.fromEmail()
@@ -379,7 +383,7 @@ export class StaticWebSite extends cdk.Construct {
      * If not using route53, this address has to be set in domain dns records as CNAME
      */
 
-    if (!hostedZone) {
+    if (!this.hostedZone) {
       new cdk.CfnOutput(this, 'Set DNS CNAME to distribution domain', {
         value: this.distribution.distributionDomainName,
       });
@@ -393,11 +397,11 @@ export class StaticWebSite extends cdk.Construct {
      * Route53 alias record for the CloudFront distribution
      */
 
-    if (hostedZone) {
+    if (this.hostedZone) {
       new route53.ARecord(this, 'Site Alias Record', {
         recordName: this.siteDomain,
         target: route53.RecordTarget.fromAlias(new CloudFrontTarget(this.distribution)),
-        zone: hostedZone,
+        zone: this.hostedZone,
       });
     }
 
@@ -437,11 +441,11 @@ export class StaticWebSite extends cdk.Construct {
        * Route53 alias record for the CloudFront hosted distribution.
        */
 
-      if (hostedZone) {
+      if (this.hostedZone) {
         new route53.ARecord(this, 'Redirection Alias Record', {
           recordName: this.redirectedDomain,
           target: route53.RecordTarget.fromAlias(new CloudFrontTarget(this.redirectionDistribution)),
-          zone: hostedZone,
+          zone: this.hostedZone,
         });
       }
     }

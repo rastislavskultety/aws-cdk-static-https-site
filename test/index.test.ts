@@ -66,9 +66,10 @@ test('StaticWebSite props are initialized', () => {
   expect(site.redirectionDistributionDomain).toMatch(nonEmptyString);
   expect(site.bucket).toBeInstanceOf(s3.Bucket);
   expect(site.distribution).toBeInstanceOf(cloudfront.CloudFrontWebDistribution);
-  expect(site.certificate).toBeInstanceOf(acm.Certificate);
   expect(site.redirectionBucket).toBeInstanceOf(s3.Bucket);
   expect(site.redirectionDistribution).toBeInstanceOf(cloudfront.CloudFrontWebDistribution);
+  expect(site.certificate).toBeInstanceOf(acm.Certificate);
+  expect(site.hostedZone).toBeInstanceOf(Object);
 });
 
 test('Domain names are correct for primaryDomain=SUB_DOMAIN', () => {

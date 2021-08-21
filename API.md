@@ -86,6 +86,14 @@ Reference to created certificate.
 
 ---
 
+##### `hostedZone`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.hostedZone"></a>
+
+- *Type:* [`@aws-cdk/aws-route53.IHostedZone`](#@aws-cdk/aws-route53.IHostedZone)
+
+Reference to hosted zone.
+
+---
+
 ##### `redirectedDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectedDomain"></a>
 
 - *Type:* `string`
