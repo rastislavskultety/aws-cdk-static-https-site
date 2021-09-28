@@ -8,7 +8,7 @@ Construct to create static web site with TLS certificate.
 
 The web site is hosted using AWS S3 bucket and CloudFront distribution.
 
-#### Initializer <a name="aws-cdk-static-https-site.StaticWebSite.Initializer"></a>
+#### Initializers <a name="aws-cdk-static-https-site.StaticWebSite.Initializer"></a>
 
 ```typescript
 import { StaticWebSite } from 'aws-cdk-static-https-site'
@@ -46,6 +46,10 @@ Properties.
 
 ##### `bucket`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.bucket"></a>
 
+```typescript
+public readonly bucket: Bucket;
+```
+
 - *Type:* [`@aws-cdk/aws-s3.Bucket`](#@aws-cdk/aws-s3.Bucket)
 
 Reference to S3 bucket holding the static web site.
@@ -53,6 +57,10 @@ Reference to S3 bucket holding the static web site.
 ---
 
 ##### `distribution`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.distribution"></a>
+
+```typescript
+public readonly distribution: CloudFrontWebDistribution;
+```
 
 - *Type:* [`@aws-cdk/aws-cloudfront.CloudFrontWebDistribution`](#@aws-cdk/aws-cloudfront.CloudFrontWebDistribution)
 
@@ -62,6 +70,10 @@ Reference to CloudFront distribution.
 
 ##### `distributionDomain`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.distributionDomain"></a>
 
+```typescript
+public readonly distributionDomain: string;
+```
+
 - *Type:* `string`
 
 Domain name of the CloudFront distribution (e.g. abc123defghij.cloudfront.net). When not using the Route 53 hosted zone, this domain can be set as CNAME for the domain to redirect to the distribution.
@@ -69,6 +81,10 @@ Domain name of the CloudFront distribution (e.g. abc123defghij.cloudfront.net). 
 ---
 
 ##### `siteDomain`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.siteDomain"></a>
+
+```typescript
+public readonly siteDomain: string;
+```
 
 - *Type:* `string`
 
@@ -80,6 +96,10 @@ www.example.org or example.org)
 
 ##### `certificate`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.certificate"></a>
 
+```typescript
+public readonly certificate: Certificate;
+```
+
 - *Type:* [`@aws-cdk/aws-certificatemanager.Certificate`](#@aws-cdk/aws-certificatemanager.Certificate)
 
 Reference to created certificate.
@@ -87,6 +107,10 @@ Reference to created certificate.
 ---
 
 ##### `hostedZone`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.hostedZone"></a>
+
+```typescript
+public readonly hostedZone: IHostedZone;
+```
 
 - *Type:* [`@aws-cdk/aws-route53.IHostedZone`](#@aws-cdk/aws-route53.IHostedZone)
 
@@ -96,6 +120,10 @@ Reference to hosted zone.
 
 ##### `redirectedDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectedDomain"></a>
 
+```typescript
+public readonly redirectedDomain: string;
+```
+
 - *Type:* `string`
 
 Domain name of the redirected secondary domain (e.g. example.org). Depends on property primaryDomain. It is undefined if property redirectSecondaryDomain is false.
@@ -103,6 +131,10 @@ Domain name of the redirected secondary domain (e.g. example.org). Depends on pr
 ---
 
 ##### `redirectionBucket`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectionBucket"></a>
+
+```typescript
+public readonly redirectionBucket: Bucket;
+```
 
 - *Type:* [`@aws-cdk/aws-s3.Bucket`](#@aws-cdk/aws-s3.Bucket)
 
@@ -112,6 +144,10 @@ Reference to S3 bucket created for redirection of secondary domain.
 
 ##### `redirectionDistribution`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectionDistribution"></a>
 
+```typescript
+public readonly redirectionDistribution: CloudFrontWebDistribution;
+```
+
 - *Type:* [`@aws-cdk/aws-cloudfront.CloudFrontWebDistribution`](#@aws-cdk/aws-cloudfront.CloudFrontWebDistribution)
 
 Reference to CloudFront distribution created for redirection of secondary domain.
@@ -119,6 +155,10 @@ Reference to CloudFront distribution created for redirection of secondary domain
 ---
 
 ##### `redirectionDistributionDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSite.property.redirectionDistributionDomain"></a>
+
+```typescript
+public readonly redirectionDistributionDomain: string;
+```
 
 - *Type:* `string`
 
@@ -143,6 +183,10 @@ const staticWebSiteProps: StaticWebSiteProps = { ... }
 
 ##### `analyticsReporting`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.analyticsReporting"></a>
 
+```typescript
+public readonly analyticsReporting: boolean;
+```
+
 - *Type:* `boolean`
 - *Default:* `analyticsReporting` setting of containing `App`, or value of
 'aws:cdk:version-reporting' context key
@@ -153,6 +197,10 @@ Include runtime versioning information in this Stack.
 
 ##### `description`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.description"></a>
 
+```typescript
+public readonly description: string;
+```
+
 - *Type:* `string`
 - *Default:* No description.
 
@@ -161,6 +209,10 @@ A description of the stack.
 ---
 
 ##### `env`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.env"></a>
+
+```typescript
+public readonly env: Environment;
+```
 
 - *Type:* [`@aws-cdk/core.Environment`](#@aws-cdk/core.Environment)
 - *Default:* The environment of the containing `Stage` if available,
@@ -191,6 +243,10 @@ environment's AWS partition, and other such enhancements.
 
 ##### `stackName`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.stackName"></a>
 
+```typescript
+public readonly stackName: string;
+```
+
 - *Type:* `string`
 - *Default:* Derived from construct path.
 
@@ -199,6 +255,10 @@ Name to deploy the stack with.
 ---
 
 ##### `synthesizer`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.synthesizer"></a>
+
+```typescript
+public readonly synthesizer: IStackSynthesizer;
+```
 
 - *Type:* [`@aws-cdk/core.IStackSynthesizer`](#@aws-cdk/core.IStackSynthesizer)
 - *Default:* `DefaultStackSynthesizer` if the `@aws-cdk/core:newStyleStackSynthesis` feature flag
@@ -210,6 +270,10 @@ Synthesis method to use while deploying this stack.
 
 ##### `tags`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.tags"></a>
 
+```typescript
+public readonly tags: {[ key: string ]: string};
+```
+
 - *Type:* {[ key: string ]: `string`}
 - *Default:* {}
 
@@ -218,6 +282,10 @@ Stack tags that will be applied to all the taggable resources and the stack itse
 ---
 
 ##### `terminationProtection`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.terminationProtection"></a>
+
+```typescript
+public readonly terminationProtection: boolean;
+```
 
 - *Type:* `boolean`
 - *Default:* false
@@ -228,6 +296,10 @@ Whether to enable termination protection for this stack.
 
 ##### `rootDomain`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.rootDomain"></a>
 
+```typescript
+public readonly rootDomain: string;
+```
+
 - *Type:* `string`
 
 Root domain of the web site, e.g. "example.org".
@@ -236,6 +308,10 @@ Root domain of the web site, e.g. "example.org".
 
 ##### `siteContentsPath`<sup>Required</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.siteContentsPath"></a>
 
+```typescript
+public readonly siteContentsPath: string;
+```
+
 - *Type:* `string`
 
 Local path where are files of the the static web site stored.
@@ -243,6 +319,10 @@ Local path where are files of the the static web site stored.
 ---
 
 ##### `certificateArn`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.certificateArn"></a>
+
+```typescript
+public readonly certificateArn: string;
+```
 
 - *Type:* `string`
 
@@ -256,6 +336,10 @@ then the certificate is created and validated depending on certificateValidation
 
 ##### `certificateValidation`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.certificateValidation"></a>
 
+```typescript
+public readonly certificateValidation: StaticWebSiteCertificateValidation;
+```
+
 - *Type:* [`aws-cdk-static-https-site.StaticWebSiteCertificateValidation`](#aws-cdk-static-https-site.StaticWebSiteCertificateValidation)
 - *Default:* StaticWebSiteCertificateValidation.FROM_EMAIL
 
@@ -267,6 +351,10 @@ It is not used when using Route 53 (useRoute53 is true).
 
 ##### `createWildcardCertificate`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.createWildcardCertificate"></a>
 
+```typescript
+public readonly createWildcardCertificate: boolean;
+```
+
 - *Type:* `boolean`
 - *Default:* false
 
@@ -275,6 +363,10 @@ Create wildcard certificate for the sub-domain, e.g. *.example.org.
 ---
 
 ##### `defaultRootObject`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.defaultRootObject"></a>
+
+```typescript
+public readonly defaultRootObject: string;
+```
 
 - *Type:* `string`
 - *Default:* ''
@@ -290,6 +382,10 @@ the right root document. Therefore the StaticWebSite is using empty string as de
 
 ##### `primaryDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.primaryDomain"></a>
 
+```typescript
+public readonly primaryDomain: StaticWebSitePrimaryDomain;
+```
+
 - *Type:* [`aws-cdk-static-https-site.StaticWebSitePrimaryDomain`](#aws-cdk-static-https-site.StaticWebSitePrimaryDomain)
 - *Default:* StaticWebSitePrimaryDomain.SUB_DOMAIN.
 
@@ -298,6 +394,10 @@ Which domain is the primary domain for the web site - the root domain (e.g. exam
 ---
 
 ##### `redirectSecondaryDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.redirectSecondaryDomain"></a>
+
+```typescript
+public readonly redirectSecondaryDomain: boolean;
+```
 
 - *Type:* `boolean`
 - *Default:* false
@@ -308,6 +408,10 @@ Redirect secondary domain to the primary domain.
 
 ##### `siteSubDomain`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.siteSubDomain"></a>
 
+```typescript
+public readonly siteSubDomain: string;
+```
+
 - *Type:* `string`
 
 Sub domain of the web site e.g. "www".
@@ -315,6 +419,10 @@ Sub domain of the web site e.g. "www".
 ---
 
 ##### `useRoute53`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.useRoute53"></a>
+
+```typescript
+public readonly useRoute53: boolean;
+```
 
 - *Type:* `boolean`
 - *Default:* true
@@ -325,6 +433,10 @@ Use Route 53 hosted zone.
 
 ##### `websiteErrorDocument`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.websiteErrorDocument"></a>
 
+```typescript
+public readonly websiteErrorDocument: string;
+```
+
 - *Type:* `string`
 - *Default:* : undefined
 
@@ -333,6 +445,10 @@ File name of the error 404 document of the web site.
 ---
 
 ##### `websiteIndexDocument`<sup>Optional</sup> <a name="aws-cdk-static-https-site.StaticWebSiteProps.property.websiteIndexDocument"></a>
+
+```typescript
+public readonly websiteIndexDocument: string;
+```
 
 - *Type:* `string`
 - *Default:* : 'index.html'
